@@ -1,0 +1,19 @@
+name: Setup Node + pnpm
+description: Setup Node.js, pnpm and install dependencies
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v5
+
+    - uses: pnpm/action-setup@v5
+      with:
+        version: 10.28.2
+
+    - uses: actions/setup-node@v5
+      with:
+        node-version: 24
+        cache: pnpm
+
+    - run: pnpm install --frozen-lockfile
+      shell: bash
