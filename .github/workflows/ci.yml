@@ -6,29 +6,75 @@ on:
   pull_request:
 
 jobs:
-  ci:
+  lint:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [24]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v5
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@v5
         with:
           version: 10.28.2
 
-      - name: Setup node
-        uses: actions/setup-node@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: "pnpm"
+          node-version: 24
+          cache: pnpm
 
-      - name: Install dependencies
-        run: pnpm install
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
 
-      - name: Run CI pipeline
-        run: pnpm ci:local
+  typecheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 10.28.2
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 10.28.2
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 10.28.2
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
